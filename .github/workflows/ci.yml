@@ -1,0 +1,14 @@
+name: Build distribution
+
+on: [push, pull_request]
+
+jobs:
+ build:
+   runs-on: ubuntu-20.04
+
+   steps:
+    - name: Checkout
+      uses: actions/checkout@v2.0.0
+
+    - name: Build Lua WASM and binding .js
+      run: make all

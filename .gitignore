@@ -1,0 +1,7 @@
+# Don't track Lua sources
+./lua-*
+
+# These are built automatically
+docs/liblua.js
+docs/liblua.wasm
+docs/liblua.html

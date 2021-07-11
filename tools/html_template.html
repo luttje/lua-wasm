@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Lua Web Assembly &bull; Demo</title>
+  <meta http-equiv="Content-Type" content="text/html"/>
+</head>
+<body>
+  <header>
+    <h1>
+      Lua Web Assembly &bull; Demo
+    </h1>
+    <img src="assets/Lua-Logo_128.png" alt="">
+    <img src="assets/WebAssembly-Logo_128.png" alt="">
+  </header>
+
+  <section>
+    <h2>Lua code</h2>
+    <p><label for="input">Enter Lua source-code you wish to execute:</label></p>
+<textarea id="input" rows="16" cols="80">
+print(_VERSION)
+return "ok"
+</textarea>
+<div>
+  <input type="button" value="Run code" onclick="runLuaInput()"/>
+</div>
+  </section>
+
+  <section>
+    <h2>Output</h2>
+    <textarea id="output" rows="8" cols="80" readonly="true"></textarea>
+    <div id="status"></div>
+  </section>
+
+  <script type="text/javascript" src="luafunctions.js"></script>
+  <script type="text/javascript" src="main.js"></script>
+  {{{ SCRIPT }}}
+</body>
+</html>
