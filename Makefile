@@ -34,7 +34,7 @@ $(LUA_LIB): $(LUA_SRC)
 
 # Generate the .js, .wasm and .html to the docs folder
 liblua.js: $(LUA_LIB)
-	$(EMCC) $(CFLAGS) $(OPTIONS) $< -o docs/liblua.html --shell-file tools/html_template.html --minify 0
+	$(EMCC) $(CFLAGS) $(OPTIONS) $< -o docs/liblua.html --shell-file tools/html_template.html
 
 .PHONY: clean
 clean: 
