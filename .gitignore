@@ -1,5 +1,5 @@
 # Don't track Lua sources
-./lua-*
+/lua-*
 
 # These are built automatically
 docs/liblua.js

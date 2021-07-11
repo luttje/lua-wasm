@@ -44,13 +44,6 @@ let luaFunctions = {
       "number"
     ]
   },
-  "lua_closeslot": {
-    "returnType": "number",
-    "parameterTypes": [
-      "number",
-      "number"
-    ]
-  },
   "lua_compare": {
     "returnType": "number",
     "parameterTypes": [
@@ -156,14 +149,6 @@ let luaFunctions = {
       "number"
     ]
   },
-  "lua_getiuservalue": {
-    "returnType": "number",
-    "parameterTypes": [
-      "number",
-      "number",
-      "number"
-    ]
-  },
   "lua_iscfunction": {
     "returnType": "number",
     "parameterTypes": [
@@ -232,14 +217,6 @@ let luaFunctions = {
   "lua_newthread": {
     "returnType": "number",
     "parameterTypes": [
-      "number"
-    ]
-  },
-  "lua_newuserdatauv": {
-    "returnType": "number",
-    "parameterTypes": [
-      "number",
-      "number",
       "number"
     ]
   },
@@ -408,16 +385,9 @@ let luaFunctions = {
       "number"
     ]
   },
-  "lua_resetthread": {
-    "returnType": "number",
-    "parameterTypes": [
-      "number"
-    ]
-  },
   "lua_resume": {
     "returnType": "number",
     "parameterTypes": [
-      "number",
       "number",
       "number",
       "number"
@@ -462,14 +432,6 @@ let luaFunctions = {
       "number"
     ]
   },
-  "lua_setiuservalue": {
-    "returnType": "number",
-    "parameterTypes": [
-      "number",
-      "number",
-      "number"
-    ]
-  },
   "lua_setmetatable": {
     "returnType": "number",
     "parameterTypes": [
@@ -487,14 +449,6 @@ let luaFunctions = {
   "lua_settop": {
     "returnType": "number",
     "parameterTypes": [
-      "number",
-      "number"
-    ]
-  },
-  "lua_setwarnf": {
-    "returnType": "number",
-    "parameterTypes": [
-      "number",
       "number",
       "number"
     ]
@@ -520,13 +474,6 @@ let luaFunctions = {
     ]
   },
   "lua_tocfunction": {
-    "returnType": "number",
-    "parameterTypes": [
-      "number",
-      "number"
-    ]
-  },
-  "lua_toclose": {
     "returnType": "number",
     "parameterTypes": [
       "number",
@@ -595,14 +542,6 @@ let luaFunctions = {
   "lua_version": {
     "returnType": "number",
     "parameterTypes": [
-      "number"
-    ]
-  },
-  "lua_warning": {
-    "returnType": "number",
-    "parameterTypes": [
-      "number",
-      "string",
       "number"
     ]
   },
@@ -714,15 +653,6 @@ let luaFunctions = {
       "number",
       "number",
       "number"
-    ]
-  },
-  "luaL_addgsub": {
-    "returnType": "number",
-    "parameterTypes": [
-      "number",
-      "string",
-      "string",
-      "string"
     ]
   },
   "luaL_addlstring": {
@@ -928,9 +858,7 @@ let luaFunctions = {
   },
   "luaL_newstate": {
     "returnType": "number",
-    "parameterTypes": [
-      "number"
-    ]
+    "parameterTypes": []
   },
   "luaL_openlibs": {
     "returnType": "number",
@@ -1037,14 +965,6 @@ let luaFunctions = {
       "number",
       "string",
       "number"
-    ]
-  },
-  "luaL_typeerror": {
-    "returnType": "string",
-    "parameterTypes": [
-      "number",
-      "number",
-      "string"
     ]
   },
   "luaL_unref": {

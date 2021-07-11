@@ -5,16 +5,16 @@ const outputField = document.querySelector('#output');
 var Module = {
   preRun: [initWrappers],
   postRun: [runLuaInput],
-  print: (function() {
-    return function(text) {
-      if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join('\t');
-        console.log(text);
-      
-      outputField.value += text + '\n';
-    };
-  })(),
+  print: function(text) {
+    if (arguments.length > 1)
+      text = Array.prototype.slice.call(arguments).join('\t');
+    
+    console.log(text);  
+    outputField.value += text + '\n';
+  },
   printErr: function(text) {
-    if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+    if (arguments.length > 1)
+      text = Array.prototype.slice.call(arguments).join('\t');
     
     console.error(text);
   }
@@ -32,15 +32,15 @@ function initWrappers(){
   }
 }
 
-let L = null;
+let luaState = null;
 function evaluateLuaString(input) {
-  if (L == null) {
-    L = luaL_newstate();
-    luaL_openlibs(L);
+  if (luaState == null) {
+    luaState = luaL_newstate();
+    luaL_openlibs(luaState);
   }
 
-  if (luaL_loadstring(L, input) == 0) {
-    if (lua_pcallk(L, 0, -1, 0, 0) == 0) {
+  if (luaL_loadstring(luaState, input) == 0) {
+    if (lua_pcallk(luaState, 0, -1, 0, 0) == 0) {
       statusLabel.innerHTML = `&#9989; Your program ran successfully and completed at ${new Date().toLocaleTimeString()}.`;
     }
     else {
@@ -51,13 +51,13 @@ function evaluateLuaString(input) {
     statusLabel.innerHTML = "&#9888; Your program failed to compile.";
   }
   
-  let n = lua_gettop(L);
+  let stackSize = lua_gettop(luaState);
 
-  for (i = 1; i <= n; i++) {
-    let res = lua_tolstring(L, i);
-    outputField.value += res + '\n';
+  for (let i = 1; i <= stackSize; i++) {
+    let result = lua_tolstring(luaState, i);
+    outputField.value += result + '\n';
   }
-  lua_settop(L, -1 - n);
+  lua_settop(luaState, -1 - stackSize);
 }
 
 function runLuaInput() {

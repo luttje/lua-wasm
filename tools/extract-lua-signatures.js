@@ -38,6 +38,9 @@ let skip = {
   lua_replace: true,
 
   lua_numbertointeger: true,
+  lua_newuserdata: true,
+  lua_getuservalue: true,
+  lua_setuservalue: true,
 
   luaL_checkversion: true,
   luaL_loadfile: true,
@@ -97,7 +100,7 @@ for (const el of functions) {
 			
 			if(p.startsWith('char') || p.startsWith('const char'))
 				parameterTypes.push('string')
-			else
+			else if(p != 'void')
 				parameterTypes.push('number')
 		});
 
