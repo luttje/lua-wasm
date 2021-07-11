@@ -7,8 +7,12 @@ jobs:
    runs-on: ubuntu-20.04
 
    steps:
-    - name: Checkout
+    - 
+      name: Warmup GitHub Actions
       uses: actions/checkout@v2.0.0
-
-    - name: Build Lua WASM and binding .js
+    - 
+      name: Install and setup Emscripten
+      uses: mymindstorm/setup-emsdk@ca0cef33e53bf9149891246a1b13ef3dbd498ca5
+    - 
+      name: Build Lua Web Assembly using Emscripten
       run: make all
