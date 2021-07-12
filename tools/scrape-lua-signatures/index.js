@@ -30,7 +30,7 @@ const { JSDOM } = jsdom
 
 if(!luaSource){
   luaSource = `../../lua-${luaVersion}`
-  console.log(`No Lua source provided with -source, defaulting to ${luaSource}`)
+  //console.log(`No Lua source provided with -source, defaulting to ${luaSource}`)
 }
 
 if(!existsSync(luaSource))
@@ -44,7 +44,7 @@ fetch(url)
   .then((html) => {
     parseDocument(new JSDOM(html).window.document)
   })
-  .catch(console.error)
+  //.catch(console.error)
 
 // Scrape for functions
 let extractFunction = /^((?:const )?[^\s]*) ([^\s]*) \(([^)]*)\);/
@@ -63,7 +63,7 @@ parseDocument = function(document){
     const parts = signatureEl.innerHTML.match(extractFunction)
 
     if(parts == null){
-      console.error(`Could not automatically generate wrapper for function signature: ${signatureEl.innerHTML}`)
+      //console.error(`Could not automatically generate wrapper for function signature: ${signatureEl.innerHTML}`)
     }else{
       let [, returnType,, parameters] = parts
 
@@ -98,19 +98,20 @@ parseDocument = function(document){
         const content = readFileSync(filePath, {encoding: "utf-8"})
         const result = search(content, textToSearch, {})
         if (result) {
-          console.log('found "' + functionName + '" to be macro (skipping)')
+          //console.log('found "' + functionName + '" to be macro (skipping)')
   
           delete luaFunctions[functionName]
         }
       }
     }
   })
-  .catch((e) => console.error(e))
+  //.catch((e) => console.error(e))
 }
 
 process.on('exit', function() {
   let luaFunctionNames = JSON.stringify(Object.keys(luaFunctions).map(func => `_${func}`))
   
-  writeFileSync(`${outputDirectory}/luafunctions.json`, luaFunctionNames)
   writeFileSync(`${outputDirectory}/luafunctions.js`, `let luaFunctions = ${JSON.stringify(luaFunctions, null, 2)}`)
+
+  console.log(luaFunctionNames);
 })

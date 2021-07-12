@@ -43,7 +43,7 @@ The makefile can be configured to your needs by setting variables. This is also 
 
 * **COMPILER** - _`Default: make`_: The compiler executable to use to build the sources.
 * **LUA_VERSION** - _`Default: Latest or 5.4.3`_: The version _(in X.Y.Z format)_ of [the Lua sources](https://www.lua.org/ftp/) to download and compile. If no version is provided the `fetch-latest-lua-version` node script tries to scrape Lua.org. If node is not installed the default version is chosen.
-* **EXPORTED_FUNCTIONS** - _`Default: array of some C API functions`_: Which Lua C API functions to export to WASM, formatted as a JSON array. By default the Makefile creates an array of all Lua functions that are not macro's (e.g: `#define lua_call(L,n,r)...`). The array is created by a node script that scrapes the Lua.org manual and checks if no `#define` exists in the downloaded sources.
+* **EXPORTED_FUNCTIONS** - _`Default: JSON array with most Lua C API functions`_: Which Lua C API functions to export to WASM, formatted as a JSON array. By default the Makefile creates an array of all Lua functions that are not macro's (e.g: `#define lua_call(L,n,r)...`). The array is created by a node script that scrapes the Lua.org manual and checks if no `#define` exists in the downloaded sources.
 
 ### Other command examples
 

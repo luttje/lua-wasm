@@ -4,7 +4,6 @@
 # These are built/generated automatically
 dist/*
 docs/luafunctions.js
-docs/luafunctions.json
 docs/index.html
 docs/liblua-*.js
 docs/liblua-*.wasm

@@ -57,9 +57,8 @@ liblua: $(LUA_LIB)
 
 # First scan the Lua sources and it's manual for functions
 scanliblua: $(LUA_LIB)
-	node tools/scrape-lua-signatures/index.js -version $(LUA_VERSION) -source $(LUA_SRC) -output $(DOCS_PATH)
-	sleep 1 
-	$(EMCC) $(CFLAGS) $(EXPORTED_RUNTIME) -s EXPORTED_FUNCTIONS='$(shell cat $(DOCS_PATH)luafunctions.json)' $< -o dist/liblua-$(LUA_VERSION).html --shell-file tools/example_template.html
+	$(eval EXPORTED_FUNCTIONS=$(shell node tools/scrape-lua-signatures/index.js -version $(LUA_VERSION) -source $(LUA_SRC) -output $(DOCS_PATH)))
+	$(EMCC) $(CFLAGS) $(EXPORTED_RUNTIME) -s EXPORTED_FUNCTIONS='$(EXPORTED_FUNCTIONS)' $< -o dist/liblua-$(LUA_VERSION).html --shell-file tools/example_template.html
 
 # Prepare the .html, .wasm and .js for the example in the docs directory
 .PHONY: docs
