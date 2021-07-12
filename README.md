@@ -13,15 +13,9 @@ As a developer you can use this to build Lua into a WebAssembly file (.wasm).
 
 Using the built Lua WASM you can interact with the original Lua C API in a browser client from JavaScript. This means you can run Lua directly in the user's browser. 
 
-## Requirements
+## Building
 
-* [Emscripten](https://emscripten.org/docs/getting_started/downloads.html) - To build the Lua sources into a `.wasm` and `.js` file.
-* A compiler that can handle the `Makefile` format:
-  * `make`
-  * (Windows) [The Windows port of the open source GCC compiler by TDM](https://jmeubank.github.io/tdm-gcc/).
-* [Node.js](https://nodejs.org/en/download/) - Used by the `Makefile` to execute the scripts in `tools/`
-  
-Add the paths to all the above software to your PATH variable.
+Read the [BUILDING](BUILDING.md) file to build your own version.
 
 ## Quick start
 

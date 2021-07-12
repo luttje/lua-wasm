@@ -2,6 +2,7 @@
   "name": "fetch-latest-lua-version",
   "version": "0.0.1",
   "description": "Scrapes the official Lua website and returns the latest Lua version",
+  "repository": "https://github.com/luttje/lua-wasm",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"

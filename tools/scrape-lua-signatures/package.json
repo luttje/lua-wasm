@@ -2,6 +2,7 @@
   "name": "scrape-lua-signatures",
   "version": "0.0.1",
   "description": "Scrapes the Lua manual of the specified version for function signatures",
+  "repository": "https://github.com/luttje/lua-wasm",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"

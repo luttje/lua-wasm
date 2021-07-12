@@ -6,13 +6,31 @@ Building will create a `liblua-{LUA_VERSION}.js` and `liblua-{LUA_VERSION}.wasm`
 
 The `docs/` directory will contain an `index.html` showing how to use the built files.
 
-## On Windows
+## Requirements
+
+* [Emscripten](https://emscripten.org/docs/getting_started/downloads.html) - To build the Lua sources into a `.wasm` and `.js` file.
+* A compiler that can handle the `Makefile` format:
+  * `make`
+  * (Windows) [The Windows port of the open source GCC compiler by TDM](https://jmeubank.github.io/tdm-gcc/).
+* [Node.js](https://nodejs.org/en/download/) - Used by the `Makefile` to execute the scripts in `tools/`
+  
+Add the paths to all the above software to your PATH variable.
+
+## Build
+
+Before you start ensure that all tools have their node modules installed:
+```
+(cd tools/fetch-latest-lua-version && npm install)
+(cd tools/scrape-lua-signatures && npm install)
+```
+
+### Windows
 
 1. Ensure you installed [the Windows port of the open source GCC compiler by TDM](https://jmeubank.github.io/tdm-gcc/) and added it to your PATH variable.
 2. Open a command prompt in the root of this repository and run 
 `mingw32-make COMPILER=mingw32-make`
 
-## On UNIX-based systems
+### UNIX-based systems
 
 Run this command from a terminal in the root of this repository: 
 `make all`
