@@ -11,16 +11,16 @@ jobs:
       name: Warmup GitHub Actions
       uses: actions/checkout@v2.0.0
     - 
-      name: Install and setup Emscripten
-      uses: mymindstorm/setup-emsdk@ca0cef33e53bf9149891246a1b13ef3dbd498ca5
-    - 
       name: Setup Node.js
       uses: actions/setup-node@v2.2.0
     -
       name: Install packages for the tools
-      run: 
+      run: |
         (cd tools/fetch-latest-lua-version && npm install)
         (cd tools/scrape-lua-signatures && npm install)
+    - 
+      name: Install and setup Emscripten
+      uses: mymindstorm/setup-emsdk@ca0cef33e53bf9149891246a1b13ef3dbd498ca5
     - 
       name: Build latest Lua version to Web Assembly using Emscripten
       run: make all
