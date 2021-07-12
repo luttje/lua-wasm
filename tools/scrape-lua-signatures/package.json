@@ -1,0 +1,23 @@
+{
+  "name": "scrape-lua-signatures",
+  "version": "0.0.1",
+  "description": "Scrapes the Lua manual of the specified version for function signatures",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "lua",
+    "manual",
+    "scrape",
+    "function",
+    "signatures"
+  ],
+  "author": "Lutt.online",
+  "license": "MIT",
+  "dependencies": {
+    "jsdom": "^16.6.0",
+    "node-fetch": "^2.6.1",
+    "search-in-file": "^1.2.2"
+  }
+}

@@ -1,56 +1,35 @@
-# Lua Web Assembly
+# Lua Web Assembly tools
 
 ![The official WASM logo](docs/assets/WebAssembly-Logo_128.png)
 ![The official Lua logo](docs/assets/Lua-Logo_128.png)
 
-Interact with the Lua C API in a browser client using WebAssembly. With this you can run Lua from JavaScript. [🎈 Play around with a demo here](https://luttje.github.io/lua-wasm/liblua.html) 
+_A collection of scripts to help build any version of the Lua source-code into Web Assembly. Supports both Windows and UNIX-based systems._
 
-This project is easily compiled on Windows or UNIX-based systems.
+**[🎈 Play around with a demo here](https://luttje.github.io/lua-wasm)**
 
-_Inspired by, and based in part on, [this repository by François Perrad](https://framagit.org/fperrad/lua.wasm)._
+## Purpose
+
+As a developer you can use this to build Lua into a WebAssembly file (.wasm).
+
+Using the built Lua WASM you can interact with the original Lua C API in a browser client from JavaScript. This means you can run Lua directly in the user's browser. 
 
 ## Requirements
 
-* [Emscripten](https://emscripten.org/docs/getting_started/downloads.html)
-* A system running `make`
-    * **Or on Windows** you should install [the Windows port of the open source GCC compiler by TDM](https://jmeubank.github.io/tdm-gcc/). Add it to your PATH variable.
+* [Emscripten](https://emscripten.org/docs/getting_started/downloads.html) - To build the Lua sources into a `.wasm` and `.js` file.
+* A compiler that can handle the `Makefile` format:
+  * `make`
+  * (Windows) [The Windows port of the open source GCC compiler by TDM](https://jmeubank.github.io/tdm-gcc/).
+* [Node.js](https://nodejs.org/en/download/) - Used by the `Makefile` to execute the scripts in `tools/`
+  
+Add the paths to all the above software to your PATH variable.
 
-## Building Lua into a WASM
+## Quick start
 
-_Check the [Releases](https://github.com/luttje/lua-wasm/releases) for pre-built files._
+[📂 Download pre-built files from the `Releases`](https://github.com/luttje/lua-wasm/releases).
 
-Use the build command below that is relevant for your system. Building will create a `liblua.js` and `liblua.wasm` file in the `docs/` directory.
+For usage information continue reading below or checkout [lua-wasm@gh-pages](https://github.com/luttje/lua-wasm/tree/gh-pages) on GitHub to see how [this Demo](https://luttje.github.io/lua-wasm) works.
 
-### On Windows
-
-1. Ensure you installed [the Windows port of the open source GCC compiler by TDM](https://jmeubank.github.io/tdm-gcc/) and added it to your PATH variable
-2. Open a command prompt and run 
-```mingw32-make all-mingw32```
-
-### On UNIX-based systems
-
-On systems that have `make` installed (by default) you can run the following command from a terminal: 
-```make all```
-
-### Changing the Lua version
-
-#### Current Lua version: `5.4.3`
-
-To change the Lua version to use simply adjust the `Makefile` to set `LUA_VERSION:=5.4.3` to the Lua version you wish to use, then rebuild.
-
-### Cleaning up
-
-After building run `clean` to remove the downloaded Lua sources.
-
-## Running Lua from JavaScript
-
-### Learn by example
-
-After following the above build information or [downloading a release](https://github.com/luttje/lua-wasm/releases) have a look at the example in `liblua.html` for an example on how to implement the Lua C API in JavaScript.
-
-Alternatively you could check out [lua-wasm@gh-pages](https://github.com/luttje/lua-wasm/tree/gh-pages) on GitHub to see how [this Demo](https://luttje.github.io/lua-wasm/liblua.html) works.
-
-### Step-by-step
+### Running Lua from JavaScript
 
 1. Define a global Module variable that looks at least like this:
     ```js
@@ -110,3 +89,37 @@ Alternatively you could check out [lua-wasm@gh-pages](https://github.com/luttje/
       lua_settop(luaState, -1 - stackSize);
     }
     ```
+6. Include the `liblua-{VERSION}.js` after the code written in the previous steps (preferably just before the `</body>` tag):
+    ```html
+    <script src="liblua-5.4.3.js"></script>
+    ```
+7. Execute your code in the browser and check the console for output:
+    ```
+    Hello World!
+    The lua code returned the following:
+    zero
+    <empty string>
+    2
+    ```
+____
+
+## Maintenance & Contributing
+
+If you find a bug, wish to write a feature or make any other type of contribution then I'll gladly take a look at any issues or Pull Requests made.
+
+Ideally this project would require as little maintenance as possible. It's intended to be set of tools to quickly build Lua into a Web Assembly file and should not stray from that.
+
+_A GitHub action periodically checks for updated Lua versions and automatically builds (untested) [pre-releases](https://github.com/luttje/lua-wasm/releases)._
+
+
+## Credits
+
+I was inspired to make this when I came across [this repository by François Perrad](https://framagit.org/fperrad/lua.wasm). Although I've changed a lot, some code from that repository may still be present (especially in the `Makefile`).
+
+[Lua](https://www.lua.org/) is a free and open-source project by Roberto Ierusalimschy and the rest of the [Lua team](https://www.lua.org/authors.html).
+
+## License
+
+This project is open-source under the [📜 MIT License](LICENSE)
+
+For third-party license acknowledgements please refer to the [NOTICE](NOTICE) file

@@ -14,7 +14,7 @@ jobs:
       name: Install and setup Emscripten
       uses: mymindstorm/setup-emsdk@ca0cef33e53bf9149891246a1b13ef3dbd498ca5
     - 
-      name: Build Lua Web Assembly using Emscripten
+      name: Build latest Lua version to Web Assembly using Emscripten
       run: make all
     - 
       name: Publish to GitHub pages

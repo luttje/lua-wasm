@@ -1,0 +1,83 @@
+Lua
+===
+
+Copyright © 1994–2021 Lua.org, PUC-Rio.
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE. 
+
+
+Node Modules Licenses
+=====================
+
+Since none of the sources of these node modules are included, the full
+license texts have been omitted in favour of the license name.
+
+commander
+License: MIT
+
+css-select
+License: BSD-2-Clause
+
+css-select-browser-adapter
+License: MIT
+
+css-what
+License: BSD-2-Clause
+
+discontinuous-range
+License: MIT
+
+dom-serializer
+License: MIT
+
+domelementtype
+License: BSD-2-Clause
+
+domhandler
+License: BSD-2-Clause
+
+domutils
+License: BSD-2-Clause
+
+entities
+License: BSD-2-Clause
+
+htmlparser2
+License: MIT
+
+moo
+License: BSD-3-Clause
+
+nearley
+License: MIT
+
+node-fetch
+License: MIT
+
+node-scrapy
+License: MIT
+
+nth-check
+License: BSD-2-Clause
+
+randexp
+License: MIT
+
+ret
+License: MIT

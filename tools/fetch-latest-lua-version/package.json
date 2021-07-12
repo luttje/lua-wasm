@@ -1,0 +1,20 @@
+{
+  "name": "fetch-latest-lua-version",
+  "version": "0.0.1",
+  "description": "Scrapes the official Lua website and returns the latest Lua version",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "lua",
+    "version",
+    "scrape"
+  ],
+  "author": "Lutt.online",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^2.6.1",
+    "node-scrapy": "^0.5.0"
+  }
+}
