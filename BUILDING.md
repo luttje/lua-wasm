@@ -61,4 +61,4 @@ Take note that emcc requires C function names to be prefixed with an underscore(
 
 ## Cleaning up
 
-After building run `clean` to remove the downloaded Lua sources.
+After building run `make clean` or `mingw32-make clean` to remove the downloaded Lua sources.
