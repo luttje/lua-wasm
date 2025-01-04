@@ -1,0 +1,4 @@
+<!doctypehtml><html lang=en><head><meta charset=UTF-8><meta content="IE=edge"http-equiv=X-UA-Compatible><meta content="width=device-width,initial-scale=1"name=viewport><title>Lua Web Assembly • Demo</title><meta content=text/html http-equiv=Content-Type></head><body><header><h1>Lua Web Assembly • Demo</h1><img alt=""src=assets/Lua-Logo_128.png> <img alt=""src=assets/WebAssembly-Logo_128.png></header><section><h2>Lua code</h2><p><label for=input>Enter Lua source-code you wish to execute:</label></p><textarea cols=80 id=input rows=16>
+print(_VERSION)
+return "ok"
+</textarea><div><input onclick=runLuaInput() type=button value="Run code"></div></section><section><h2>Output</h2><textarea cols=80 id=output rows=8 readonly></textarea><div id=status></div></section><script src=luafunctions.js></script><script src=main.js></script><script src=liblua-5.4.7.js async></script></body></html>
