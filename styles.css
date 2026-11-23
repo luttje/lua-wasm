@@ -1,0 +1,546 @@
+:root {
+  color-scheme: light dark;
+
+  --lua: #000080;
+  --wasm: #654ff0;
+  --ink: #14143a;
+  --muted: #6b6b8a;
+  --paper: #fbfbfe;
+  --glow: rgb(101 79 240 / 0.09);
+  --card: #ffffff;
+  --line: #e6e6f2;
+  --code: #f6f6fb;
+  --focus: rgb(101 79 240 / 0.45);
+  --shadow: 0 1px 2px rgb(20 20 58 / 0.04), 0 12px 32px -12px rgb(20 20 58 / 0.12);
+  --logo-shadow: drop-shadow(0 8px 18px rgb(0 0 128 / 0.18));
+  --button: var(--lua);
+  --button-hover: var(--wasm);
+  --badge: var(--lua);
+  --accent-from: var(--lua);
+  --accent-to: var(--wasm);
+  --ok: #1f9d6b;
+  --error: #d64545;
+  --warn: #c98a12;
+  --mono: ui-monospace, 'SFMono-Regular', 'Cascadia Code', Menlo, Consolas, monospace;
+}
+
+/* Dark mode follows the system setting: a night sky with Lua as its moon */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e9e9f7;
+    --muted: #9696b8;
+    --paper: #0b0b18;
+    --glow: rgb(101 79 240 / 0.2);
+    --card: #13132a;
+    --line: #25254a;
+    --code: #0f0f22;
+    --focus: rgb(143 131 255 / 0.55);
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 16px 40px -16px rgb(0 0 0 / 0.6);
+    --logo-shadow: drop-shadow(0 0 22px rgb(143 131 255 / 0.45));
+    --button: var(--wasm);
+    --button-hover: #7d6bff;
+    --badge: #b4acff;
+    --accent-from: #8f83ff;
+    --accent-to: #c3bcff;
+    --ok: #4cc596;
+    --error: #ff7a7a;
+    --warn: #f0b44c;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  font: 16px/1.6 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background:
+    radial-gradient(ellipse 60% 420px at 50% 0, var(--glow), transparent),
+    var(--paper);
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 72px 24px 48px;
+}
+
+/* Header */
+
+.hero {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.logos {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.logos img {
+  display: block;
+  width: 72px;
+  height: 72px;
+  filter: var(--logo-shadow);
+}
+
+/* The navy Lua logo needs some moonlight behind it on a dark background */
+@media (prefers-color-scheme: dark) {
+  /* Padding grows the halo past the logo's own moon, the negative margin keeps the layout */
+  .logos .lua {
+    width: 88px;
+    height: 88px;
+    margin: -8px;
+    padding: 8px;
+    border-radius: 50%;
+    background: radial-gradient(circle closest-side, rgb(205 200 255 / 0.6), rgb(205 200 255 / 0.4) 88%, transparent);
+  }
+}
+
+.times {
+  color: var(--muted);
+  font-size: 22px;
+  font-weight: 300;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 2.75rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.accent {
+  background: linear-gradient(135deg, var(--accent-from), var(--accent-to));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 300;
+}
+
+.tagline {
+  max-width: 30em;
+  margin: 12px auto 0;
+  color: var(--muted);
+}
+
+/* Cards */
+
+/* No overflow: hidden here, so the version picker can open over the editor.
+   The last child rounds its own corners instead. */
+.card {
+  margin-bottom: 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.card > :last-child {
+  border-radius: 0 0 15px 15px;
+}
+
+.card-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 8px 8px 18px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font: 500 13px var(--mono);
+}
+
+.file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+textarea,
+pre {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 18px;
+  border: 0;
+  color: var(--ink);
+  font: 14px/1.65 var(--mono);
+  tab-size: 2;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 240px;
+  outline: none;
+  background: var(--card);
+}
+
+.card:focus-within {
+  border-color: var(--focus);
+}
+
+pre {
+  min-height: 96px;
+  max-height: 320px;
+  overflow: auto;
+  background: var(--code);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+pre:empty::before {
+  content: 'Nothing printed yet.';
+  color: var(--muted);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--wasm);
+  outline-offset: 2px;
+}
+
+/* Version picker */
+
+.picker {
+  position: relative;
+}
+
+.picker-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 10px 3px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--code);
+  color: var(--badge);
+  font: 500 13px/1.6 var(--mono);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.picker-button:hover:not(:disabled),
+.picker-button[aria-expanded='true'] {
+  border-color: var(--focus);
+  background: var(--card);
+}
+
+.picker-button:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+/* A chevron that flips when open, and becomes a spinner while loading */
+.picker-icon {
+  width: 6px;
+  height: 6px;
+  margin: -3px 2px 0;
+  border: solid currentColor;
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+  transition: transform 0.2s;
+}
+
+[aria-expanded='true'] .picker-icon {
+  margin-top: 3px;
+  transform: rotate(-135deg);
+}
+
+.picker[data-busy] .picker-icon {
+  width: 10px;
+  height: 10px;
+  margin: 0;
+  border-width: 1.5px;
+  border-color: currentColor transparent currentColor currentColor;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.picker-list {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 200px;
+  max-height: 280px;
+  overflow: auto;
+  margin: 0;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: var(--shadow), 0 20px 40px -20px rgb(20 20 58 / 0.25);
+  list-style: none;
+  outline: none;
+  transform-origin: top left;
+  animation: drop 0.16s ease-out;
+}
+
+.picker-list[hidden] {
+  display: none;
+}
+
+@keyframes drop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+.picker-list [role='option'] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  color: var(--ink);
+  font: 500 13px/1.5 var(--mono);
+  cursor: pointer;
+}
+
+.picker-list [role='option'].active {
+  background: var(--code);
+}
+
+/* A check mark after the version in use */
+.picker-list [role='option']::after {
+  content: '';
+  width: 5px;
+  height: 9px;
+  margin: -3px 2px 0 auto;
+  border: solid var(--badge);
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+  visibility: hidden;
+}
+
+.picker-list [aria-selected='true']::after {
+  visibility: visible;
+}
+
+.picker-list [aria-selected='true'] {
+  color: var(--badge);
+}
+
+.tag {
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--flash);
+  color: var(--badge);
+  font: 600 10px/1.8 system-ui, sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Run button */
+
+#run {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px 8px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--button);
+  color: #fff;
+  font: 600 14px system-ui, sans-serif;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+#run:hover:not(:disabled) {
+  background: var(--button-hover);
+}
+
+#run:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+#run:disabled {
+  opacity: 0.4;
+  cursor: progress;
+}
+
+kbd {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 0.16);
+  font: 500 11px var(--mono);
+}
+
+/* Phones have no Ctrl key to show */
+@media (max-width: 480px) {
+  #run {
+    padding-right: 18px;
+  }
+
+  #run kbd {
+    display: none;
+  }
+}
+
+/* Status */
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 10px;
+}
+
+.status::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status[data-state='loading'] {
+  color: var(--muted);
+}
+
+.status[data-state='ok'] {
+  color: var(--ok);
+}
+
+.status[data-state='error'] {
+  color: var(--error);
+}
+
+.status[data-state='warn'] {
+  color: var(--warn);
+}
+
+/* Feedback after each run: main.js replays these by re-adding the .ran class */
+
+:root {
+  --ring: rgb(101 79 240 / 0.45);
+  --flash: rgb(101 79 240 / 0.28);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ring: rgb(143 131 255 / 0.55);
+    --flash: rgb(143 131 255 / 0.32);
+  }
+}
+
+/* The button sends out a ring, like a ripple */
+#run.ran {
+  animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    box-shadow: 0 0 0 0 var(--ring);
+    transform: scale(0.95);
+  }
+
+  30% {
+    transform: scale(1);
+  }
+
+  100% {
+    box-shadow: 0 0 0 14px transparent;
+  }
+}
+
+/* The output card lights up, then the new output rises into view */
+.output.ran {
+  animation: flash 0.9s ease-out;
+}
+
+.output.ran pre {
+  animation: rise 0.35s ease-out;
+}
+
+.output.ran .status {
+  animation: pop 0.35s ease-out;
+}
+
+@keyframes flash {
+  0% {
+    border-color: var(--wasm);
+    box-shadow: 0 0 0 4px var(--flash), var(--shadow);
+  }
+
+  100% {
+    border-color: var(--line);
+    box-shadow: 0 0 0 4px transparent, var(--shadow);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+/* Without motion, keep only the flash and fade */
+@media (prefers-reduced-motion: reduce) {
+  #run.ran,
+  .picker-list {
+    animation: none;
+  }
+
+  .output.ran pre,
+  .output.ran .status {
+    animation-name: fade;
+  }
+
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
+/* Footer */
+
+footer {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 40px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+footer a {
+  color: inherit;
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: var(--button-hover);
+}
