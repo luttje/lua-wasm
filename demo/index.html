@@ -2,11 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Lua Web Assembly &bull; Demo</title>
-  <meta http-equiv="Content-Type" content="text/html"/>
 </head>
 <body>
   <header>
@@ -25,18 +23,16 @@ print(_VERSION)
 return "ok"
 </textarea>
 <div>
-  <input type="button" value="Run code" onclick="runLuaInput()"/>
+  <button id="run" type="button" disabled>Run code</button>
 </div>
   </section>
 
   <section>
     <h2>Output</h2>
-    <textarea id="output" rows="8" cols="80" readonly="true"></textarea>
-    <div id="status"></div>
+    <textarea id="output" rows="8" cols="80" readonly></textarea>
+    <div id="status">&#8986; Loading Lua ...</div>
   </section>
 
-  <script type="text/javascript" src="luafunctions.js"></script>
-  <script type="text/javascript" src="main.js"></script>
-  {{{ SCRIPT }}}
+  <script type="module" src="main.js"></script>
 </body>
 </html>

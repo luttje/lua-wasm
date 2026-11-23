@@ -3,19 +3,18 @@
 
 import assert from 'node:assert/strict'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
-import { createRequire } from 'node:module'
 import path from 'node:path'
 import { before, test } from 'node:test'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const DIST = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist')
 
-/** Finds the most recently built liblua-<version>.js in dist/. */
+/** Finds the most recently built liblua-<version>.mjs in dist/. */
 function findBuild() {
   let files = []
 
   try {
-    files = readdirSync(DIST).filter((file) => /^liblua-[\d.]+\.js$/.test(file))
+    files = readdirSync(DIST).filter((file) => /^liblua-[\d.]+\.mjs$/.test(file))
   } catch {
     // No dist/ at all is reported below, like an empty one.
   }
@@ -25,24 +24,10 @@ function findBuild() {
   const newest = (file) => statSync(path.join(DIST, file)).mtimeMs
   const file = files.sort((a, b) => newest(b) - newest(a))[0]
 
-  return { file: path.join(DIST, file), version: file.match(/^liblua-([\d.]+)\.js$/)[1] }
+  return { file: path.join(DIST, file), version: file.match(/^liblua-([\d.]+)\.mjs$/)[1] }
 }
 
-/**
- * Starts the Emscripten module the way a web page would: the script reads
- * its settings from a `Module` variable that already exists when it runs.
- */
-function loadModule(file, settings) {
-  const run = new Function('Module', 'require', '__dirname', '__filename', readFileSync(file, 'utf8'))
-
-  return new Promise((resolve, reject) => {
-    const Module = { ...settings, onRuntimeInitialized: () => resolve(Module), onAbort: reject }
-    run(Module, createRequire(file), path.dirname(file), file)
-  })
-}
-
-let lua // Every exported Lua C API function, by its C name
-let Module
+let lua // The module, with every exported Lua C API function under its C name
 let version
 let bindings
 const printed = []
@@ -51,13 +36,9 @@ before(async () => {
   const build = findBuild()
   version = build.version
 
-  Module = await loadModule(build.file, { print: (text) => printed.push(text), printErr: () => {} })
+  const { default: createLua } = await import(pathToFileURL(build.file))
+  lua = await createLua({ print: (text) => printed.push(text), printErr: () => {} })
   bindings = JSON.parse(readFileSync(path.join(DIST, 'luafunctions.json'), 'utf8'))
-
-  lua = {}
-  for (const [name, { returnType, parameterTypes }] of Object.entries(bindings)) {
-    lua[name] = Module.cwrap(name, returnType, parameterTypes)
-  }
 })
 
 function newState() {
@@ -67,10 +48,12 @@ function newState() {
   return L
 }
 
-test('every function in luafunctions.json is exported', () => {
-  const missing = Object.keys(bindings).filter((name) => typeof Module[`_${name}`] !== 'function')
+test('every function in luafunctions.json is exported and wrapped', () => {
+  const missing = Object.keys(bindings).filter((name) => typeof lua[`_${name}`] !== 'function')
+  const unwrapped = Object.keys(bindings).filter((name) => typeof lua[name] !== 'function')
 
   assert.deepEqual(missing, [])
+  assert.deepEqual(unwrapped, [])
 })
 
 test('runs Lua code and reads its results', () => {

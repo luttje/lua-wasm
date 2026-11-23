@@ -4,7 +4,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
 import { parseHeaders, parseManual, parseSignature } from '../lib/lua-api.mjs'
-import { describeBindings, generateMacroWrappers } from '../lib/wrappers.mjs'
+import { describeBindings, generateBindingsScript, generateMacroWrappers } from '../lib/wrappers.mjs'
 
 test('parseSignature reads return type, name and parameters', () => {
   assert.deepEqual(parseSignature('lua_pcall', 'int lua_pcall (lua_State *L, int nargs, int nresults, int msgh);'), {
@@ -111,4 +111,21 @@ test('describeBindings maps C types to cwrap types', () => {
     luaL_loadstring: { returnType: 'number', parameterTypes: ['number', 'string'] },
     luaL_buffaddr: { returnType: 'number', parameterTypes: ['number'] },
   })
+})
+
+test('generateBindingsScript wraps each function on first call', () => {
+  const calls = []
+  const cwrap = (name, returnType, parameterTypes) => {
+    calls.push([name, returnType, parameterTypes])
+    return (...args) => `${name}(${args.join(', ')})`
+  }
+
+  const Module = {}
+  const script = generateBindingsScript({ lua_gettop: { returnType: 'number', parameterTypes: ['number'] } })
+  new Function('Module', 'cwrap', script)(Module, cwrap)
+
+  assert.deepEqual(calls, [], 'cwrap must wait until the module is ready')
+  assert.equal(Module.lua_gettop(1), 'lua_gettop(1)')
+  assert.equal(Module.lua_gettop(2), 'lua_gettop(2)')
+  assert.deepEqual(calls, [['lua_gettop', 'number', ['number']]])
 })

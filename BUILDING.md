@@ -20,9 +20,8 @@ The `dist/` directory then contains:
 
 | File | Purpose |
 | --- | --- |
-| `liblua-{LUA_VERSION}.js` and `liblua-{LUA_VERSION}.wasm` | Lua, built by Emscripten |
-| `luafunctions.js` | Defines a global `luaFunctions` that describes every exported Lua C API function, for use with `Module.cwrap` |
-| `luafunctions.json` | The same description as plain JSON |
+| `liblua-{LUA_VERSION}.mjs` and `liblua-{LUA_VERSION}.wasm` | Lua, built by Emscripten as an ES module. See the [README](README.md#usage) for how to use it |
+| `luafunctions.json` | Describes every exported Lua C API function: its return and parameter types, as JavaScript sees them |
 | `index.html`, `main.js` and `assets/` | A demo page showing how to use the files above. Its sources are in `demo/` |
 
 Open the demo through a web server, for example with `npx http-server dist`. Browsers refuse to load `.wasm` files from `file://` URLs.
