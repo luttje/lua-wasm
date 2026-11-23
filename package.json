@@ -1,0 +1,16 @@
+{
+  "name": "lua-wasm",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Builds any version of the Lua source-code into WebAssembly",
+  "repository": "https://github.com/luttje/lua-wasm",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test",
+    "clean": "node build.mjs --clean"
+  }
+}

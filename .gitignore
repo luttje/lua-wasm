@@ -1,5 +1,5 @@
-# Downloaded Lua sources
-/lua-*
+# Downloaded Lua sources and generated C
+.cache/
 
 # Build output
 dist/
