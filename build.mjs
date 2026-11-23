@@ -6,6 +6,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
 
+import { readApi } from './lib/lua-api.mjs'
 import { fetchLatestVersion, fetchSource, resolveVersion } from './lib/lua-source.mjs'
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url))
@@ -56,7 +57,13 @@ async function main() {
   console.log(`Building Lua ${version}`)
 
   const sourceDir = await fetchSource(version, cacheDir)
-  console.log(`Lua sources are in ${path.relative(ROOT, sourceDir)}`)
+  const { api, unknown } = await readApi(sourceDir)
+  const macros = api.filter((entry) => entry.kind === 'macro')
+  console.log(`Found ${api.length - macros.length} functions and ${macros.length} macros in the Lua ${version} manual`)
+
+  if (unknown.length > 0) {
+    console.warn(`Skipping names the manual documents but the public headers don't define: ${unknown.join(', ')}`)
+  }
 }
 
 main().catch((error) => {
