@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 // Builds a Lua release into WebAssembly. Run `node build.mjs --help` for usage.
 
-import { rm } from 'node:fs/promises'
+import { rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
 
 import { readApi } from './lib/lua-api.mjs'
 import { fetchLatestVersion, fetchSource, resolveVersion } from './lib/lua-source.mjs'
+import { generateMacroWrappers } from './lib/wrappers.mjs'
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url))
 
@@ -58,11 +59,20 @@ async function main() {
 
   const sourceDir = await fetchSource(version, cacheDir)
   const { api, unknown } = await readApi(sourceDir)
-  const macros = api.filter((entry) => entry.kind === 'macro')
-  console.log(`Found ${api.length - macros.length} functions and ${macros.length} macros in the Lua ${version} manual`)
+  const functions = api.filter((entry) => entry.kind === 'function')
+  console.log(`Found ${functions.length} functions and ${api.length - functions.length} macros in the Lua ${version} manual`)
 
   if (unknown.length > 0) {
     console.warn(`Skipping names the manual documents but the public headers don't define: ${unknown.join(', ')}`)
+  }
+
+  const wrappers = generateMacroWrappers(api)
+  const wrappersPath = path.join(sourceDir, 'lua_wasm_macros.c')
+  await writeFile(wrappersPath, wrappers.source)
+  console.log(`Wrapped ${wrappers.wrapped.length} macros as functions in ${path.relative(ROOT, wrappersPath)}`)
+
+  for (const { name, reason } of wrappers.skipped) {
+    console.warn(`Skipping macro ${name}: ${reason}`)
   }
 }
 
