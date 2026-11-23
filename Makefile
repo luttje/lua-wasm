@@ -16,7 +16,7 @@ endif
 LUA_TARBALL=lua-$(LUA_VERSION).tar.gz
 LUA_SRC=lua-$(LUA_VERSION)/src
 LUA_LIB=$(LUA_SRC)/liblua.a
-DOCS_PATH:=docs/
+DOCS_PATH:=dist/
 
 CFLAGS:=-O2
 
@@ -53,19 +53,19 @@ directories:
 
 # Generate the .js, .wasm and .html
 liblua: $(LUA_LIB)
-	$(EMCC) $(CFLAGS) $(EXPORTED_RUNTIME) -s EXPORTED_FUNCTIONS='$(EXPORTED_FUNCTIONS)' $< -o dist/liblua-$(LUA_VERSION).html --shell-file tools/example_template.html
+	$(EMCC) $(CFLAGS) $(EXPORTED_RUNTIME) -s EXPORTED_FUNCTIONS='$(EXPORTED_FUNCTIONS)' $< -o dist/liblua-$(LUA_VERSION).html --shell-file demo/index.html
 
 # First scan the Lua sources and it's manual for functions
 scanliblua: $(LUA_LIB)
 	$(eval EXPORTED_FUNCTIONS=$(shell node tools/scrape-lua-signatures/index.js -version $(LUA_VERSION) -source $(LUA_SRC) -output $(DOCS_PATH)))
-	$(EMCC) $(CFLAGS) $(EXPORTED_RUNTIME) -s EXPORTED_FUNCTIONS='$(EXPORTED_FUNCTIONS)' $< -o dist/liblua-$(LUA_VERSION).html --shell-file tools/example_template.html
+	$(EMCC) $(CFLAGS) $(EXPORTED_RUNTIME) -s EXPORTED_FUNCTIONS='$(EXPORTED_FUNCTIONS)' $< -o dist/liblua-$(LUA_VERSION).html --shell-file demo/index.html
 
-# Prepare the .html, .wasm and .js for the example in the docs directory
+# Assemble the demo page next to the built .js and .wasm in dist/
 .PHONY: docs
 docs:
 	mv dist/liblua-$(LUA_VERSION).html $(DOCS_PATH)index.html
-	cp -f dist/liblua-$(LUA_VERSION).js $(DOCS_PATH)liblua-$(LUA_VERSION).js
-	cp -f dist/liblua-$(LUA_VERSION).wasm $(DOCS_PATH)liblua-$(LUA_VERSION).wasm
+	cp -f demo/main.js $(DOCS_PATH)main.js
+	cp -rf demo/assets $(DOCS_PATH)
 
 # Cleanup the Lua sources
 .PHONY: clean

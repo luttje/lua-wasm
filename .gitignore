@@ -1,9 +1,5 @@
-# Don't track Lua sources
+# Downloaded Lua sources
 /lua-*
 
-# These are built/generated automatically
-dist/*
-docs/luafunctions.js
-docs/index.html
-docs/liblua-*.js
-docs/liblua-*.wasm
+# Build output
+dist/

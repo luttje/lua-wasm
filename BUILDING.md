@@ -4,7 +4,7 @@ Run the build command below that is relevant for your system in the root of this
 
 Building will create a `liblua-{LUA_VERSION}.js` and `liblua-{LUA_VERSION}.wasm` file the `dist/` directory. 
 
-The `docs/` directory will contain an `index.html` showing how to use the built files.
+The `dist/` directory will also contain an `index.html` showing how to use the built files (its sources live in `demo/`).
 
 ## Requirements
 

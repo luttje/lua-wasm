@@ -1,7 +1,7 @@
 # Lua Web Assembly tools
 
-![The official WASM logo](docs/assets/WebAssembly-Logo_128.png)
-![The official Lua logo](docs/assets/Lua-Logo_128.png)
+![The official WASM logo](demo/assets/WebAssembly-Logo_128.png)
+![The official Lua logo](demo/assets/Lua-Logo_128.png)
 
 _A collection of scripts to help build any version of the Lua source-code into Web Assembly. Supports both Windows and UNIX-based systems._
 
@@ -38,7 +38,7 @@ For usage information continue reading below or checkout [lua-wasm@gh-pages](htt
     };
     ```
     _Read more about the Module object in [the Emscripten documentation](https://emscripten.org/docs/api_reference/module.html#affecting-execution)_
-2. Look in `docs/main.js` for an example of `initWrappers`, or manually define which of the Lua C API you wish to wrap:
+2. Look in `demo/main.js` for an example of `initWrappers`, or manually define which of the Lua C API you wish to wrap:
     ```js
     function initWrappers(){
       luaL_newstate = Module.cwrap('luaL_newstate', 'number', []);
