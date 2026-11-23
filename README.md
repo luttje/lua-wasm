@@ -1,11 +1,13 @@
-# Lua Web Assembly tools
+# Lua WebAssembly tools
 
-![The official WASM logo](demo/assets/WebAssembly-Logo_128.png)
-![The official Lua logo](demo/assets/Lua-Logo_128.png)
+<center>
+
+[![The Lua and WebAssembly logo's followed by the text: Lua x WebAssembly - The real Lua, compiled to WebAssembly and running right here in your browser.](./logo.png)](https://luttje.github.io/lua-wasm)
+**[🎈 Play around with a demo here](https://luttje.github.io/lua-wasm)**
+
+</center>
 
 _A build script that turns any version of the Lua source-code (5.1 and newer) into WebAssembly, so you can use the Lua C API from JavaScript in the browser or in Node.js._
-
-**[🎈 Play around with a demo here](https://luttje.github.io/lua-wasm)**
 
 ## Usage
 

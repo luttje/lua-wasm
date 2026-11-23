@@ -38,7 +38,7 @@ before(async () => {
 
   const { default: createLua } = await import(pathToFileURL(build.file))
   lua = await createLua({ print: (text) => printed.push(text), printErr: () => {} })
-  bindings = JSON.parse(readFileSync(path.join(DIST, 'luafunctions.json'), 'utf8'))
+  bindings = JSON.parse(readFileSync(build.file.replace(/\.mjs$/, '.json'), 'utf8'))
 })
 
 function newState() {
@@ -48,7 +48,7 @@ function newState() {
   return L
 }
 
-test('every function in luafunctions.json is exported and wrapped', () => {
+test('every function in liblua-<version>.json is exported and wrapped', () => {
   const missing = Object.keys(bindings).filter((name) => typeof lua[`_${name}`] !== 'function')
   const unwrapped = Object.keys(bindings).filter((name) => typeof lua[name] !== 'function')
 

@@ -13,18 +13,26 @@
   <main class="container">
     <header class="hero">
       <div class="logos">
-        <img class="lua" src="assets/Lua-Logo_128.png" alt="Lua"width="72" height="72">
+        <img class="lua" src="assets/Lua-Logo_128.png" alt="Lua" width="72" height="72">
         <span class="times" aria-hidden="true">×</span>
         <img src="assets/WebAssembly-Logo_128.png" alt="WebAssembly" width="72" height="72">
       </div>
       <h1>Lua <span class="accent">×</span> WebAssembly</h1>
       <p class="tagline">The real Lua, compiled to WebAssembly and running right here in your browser.</p>
-      <p class="version" id="version" hidden></p>
     </header>
 
     <section class="card" aria-labelledby="input-label">
       <div class="card-bar">
-        <label id="input-label" for="input">main.lua</label>
+        <div class="file">
+          <label id="input-label" for="input">main.lua</label>
+          <div class="picker" id="picker">
+            <button class="picker-button" type="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="picker-list" title="Lua version" disabled>
+              <span class="picker-value">Lua</span>
+              <span class="picker-icon" aria-hidden="true"></span>
+            </button>
+            <ul class="picker-list" id="picker-list" role="listbox" aria-label="Lua version" tabindex="-1" hidden></ul>
+          </div>
+        </div>
         <button id="run" type="button" disabled>
           Run <kbd>Ctrl</kbd><kbd>↵</kbd>
         </button>

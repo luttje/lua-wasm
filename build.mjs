@@ -1,14 +1,14 @@
 #!/usr/bin/env node
-// Builds a Lua release into WebAssembly. Run `node build.mjs --help` for usage.
+// Builds Lua releases into WebAssembly. Run `node build.mjs --help` for usage.
 
-import { cp, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
+import { cp, mkdir, readdir, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
 
 import { compile } from './lib/emcc.mjs'
 import { readApi } from './lib/lua-api.mjs'
-import { fetchLatestVersion, fetchSource, resolveVersion } from './lib/lua-source.mjs'
+import { compareVersions, fetchLatestVersion, fetchSource, resolveVersion } from './lib/lua-source.mjs'
 import { describeBindings, generateBindingsScript, generateMacroWrappers } from './lib/wrappers.mjs'
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url))
@@ -17,13 +17,14 @@ const DEMO_DIR = path.join(ROOT, 'demo')
 const HELP = `Usage: node build.mjs [options]
 
 Options:
-  --lua <version>   Lua version to build, as X.Y.Z or "latest" (default: latest)
+  --lua <versions>  Comma-separated Lua versions to build, as X.Y.Z or "latest",
+                    for example 5.1.5,5.4.8,latest (default: latest)
   --exports <list>  Comma-separated Lua C API functions to export, for example
                     luaL_newstate,luaL_loadstring,lua_pcall (default: all)
   --out <dir>       Where to put the built files (default: dist)
   --cache <dir>     Where to keep downloaded Lua sources (default: .cache)
   --demo            Only copy the demo to the output directory, reusing the
-                    Lua build already there (fast, no emcc needed)
+                    Lua builds already there (fast, no emcc needed)
   --print-latest    Print the latest Lua version and exit
   --clean           Remove the output and cache directories and exit
   --help            Show this message
@@ -44,69 +45,29 @@ function selectExports(exportable, requested) {
   return names.map((name) => byName.get(name))
 }
 
-/** Copies the demo page to `outDir`, pointed at the Lua module `<name>.mjs`. */
-async function copyDemo(outDir, name) {
-  await cp(DEMO_DIR, outDir, { recursive: true })
+/**
+ * Copies the demo page to `outDir`, with a versions.json that lists every
+ * Lua build in there, newest first. The demo offers each of them.
+ */
+async function copyDemo(outDir) {
+  const versions = (await readdir(outDir).catch(() => []))
+    .map((file) => file.match(/^liblua-(\d+\.\d+\.\d+)\.mjs$/)?.[1])
+    .filter(Boolean)
+    .sort(compareVersions)
+    .reverse()
 
-  const demoScript = path.join(outDir, 'main.js')
-  await writeFile(demoScript, (await readFile(demoScript, 'utf8')).replace('./liblua.mjs', `./${name}.mjs`))
-}
-
-/** Finds the name of the most recently built Lua module in `outDir`. */
-async function findBuiltModule(outDir) {
-  const files = (await readdir(outDir).catch(() => [])).filter((file) => /^liblua-[\d.]+\.mjs$/.test(file))
-
-  if (files.length === 0) {
+  if (versions.length === 0) {
     throw new Error(`No Lua build found in ${outDir}. Run \`node build.mjs\` once first.`)
   }
 
-  const builtAt = async (file) => (await stat(path.join(outDir, file))).mtimeMs
-  const times = await Promise.all(files.map(builtAt))
+  await cp(DEMO_DIR, outDir, { recursive: true })
+  await writeFile(path.join(outDir, 'versions.json'), `${JSON.stringify(versions)}\n`)
 
-  return files[times.indexOf(Math.max(...times))].replace(/\.mjs$/, '')
+  return versions
 }
 
-async function main() {
-  const { values: options } = parseArgs({
-    options: {
-      lua: { type: 'string', default: 'latest' },
-      exports: { type: 'string' },
-      out: { type: 'string' },
-      cache: { type: 'string' },
-      demo: { type: 'boolean' },
-      'print-latest': { type: 'boolean' },
-      clean: { type: 'boolean' },
-      help: { type: 'boolean' },
-    },
-  })
-
-  const outDir = path.resolve(options.out ?? path.join(ROOT, 'dist'))
-  const cacheDir = path.resolve(options.cache ?? path.join(ROOT, '.cache'))
-
-  if (options.help) {
-    console.log(HELP)
-    return
-  }
-
-  if (options['print-latest']) {
-    console.log(await fetchLatestVersion())
-    return
-  }
-
-  if (options.demo) {
-    const name = await findBuiltModule(outDir)
-    await copyDemo(outDir, name)
-    console.log(`Copied the demo to ${path.relative(process.cwd(), outDir) || '.'}, using ${name}.mjs`)
-    return
-  }
-
-  if (options.clean) {
-    await rm(outDir, { recursive: true, force: true })
-    await rm(cacheDir, { recursive: true, force: true })
-    return
-  }
-
-  const version = await resolveVersion(options.lua)
+/** Compiles one Lua version into `outDir` as liblua-<version>.mjs, .wasm and .json. */
+async function build(version, { outDir, cacheDir, exports }) {
   console.log(`Building Lua ${version}`)
 
   const sourceDir = await fetchSource(version, cacheDir)
@@ -127,7 +88,7 @@ async function main() {
     console.warn(`Skipping macro ${name}: ${reason}`)
   }
 
-  const exported = selectExports([...functions, ...wrappers.wrapped], options.exports)
+  const exported = selectExports([...functions, ...wrappers.wrapped], exports)
   const name = `liblua-${version}`
 
   // The module puts every exported function on itself, already wrapped.
@@ -149,11 +110,60 @@ async function main() {
   })
 
   // The same description as JSON, for tools and type generators.
-  await writeFile(path.join(outDir, 'luafunctions.json'), `${JSON.stringify(bindings, null, 2)}\n`)
-
-  await copyDemo(outDir, name)
+  await writeFile(path.join(outDir, `${name}.json`), `${JSON.stringify(bindings, null, 2)}\n`)
 
   console.log(`Built ${name}.mjs and ${name}.wasm in ${path.relative(process.cwd(), outDir) || '.'}`)
+}
+
+async function main() {
+  const { values: options } = parseArgs({
+    options: {
+      lua: { type: 'string', default: 'latest' },
+      exports: { type: 'string' },
+      out: { type: 'string' },
+      cache: { type: 'string' },
+      demo: { type: 'boolean' },
+      'print-latest': { type: 'boolean' },
+      clean: { type: 'boolean' },
+      help: { type: 'boolean' },
+    },
+  })
+
+  const outDir = path.resolve(options.out ?? path.join(ROOT, 'dist'))
+  const cacheDir = path.resolve(options.cache ?? path.join(ROOT, '.cache'))
+  const where = path.relative(process.cwd(), outDir) || '.'
+
+  if (options.help) {
+    console.log(HELP)
+    return
+  }
+
+  if (options['print-latest']) {
+    console.log(await fetchLatestVersion())
+    return
+  }
+
+  if (options.demo) {
+    const versions = await copyDemo(outDir)
+    console.log(`Copied the demo to ${where}, offering Lua ${versions.join(', ')}`)
+    return
+  }
+
+  if (options.clean) {
+    await rm(outDir, { recursive: true, force: true })
+    await rm(cacheDir, { recursive: true, force: true })
+    return
+  }
+
+  const requested = options.lua.split(',').map((version) => version.trim()).filter(Boolean)
+  const versions = [...new Set(await Promise.all(requested.map(resolveVersion)))]
+
+  for (const version of versions) {
+    await build(version, { outDir, cacheDir, exports: options.exports })
+  }
+
+  const offered = await copyDemo(outDir)
+  console.log(`Copied the demo to ${where}, offering Lua ${offered.join(', ')}`)
 }
 
 main().catch((error) => {

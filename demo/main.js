@@ -1,8 +1,6 @@
-// The build replaces this path with the versioned file, e.g. ./liblua-5.4.8.mjs
-import createLua from './liblua.mjs';
+import { createPicker } from './picker.js';
 
 const statusLabel = document.querySelector('#status');
-const versionLabel = document.querySelector('#version');
 const inputField = document.querySelector('#input');
 const outputField = document.querySelector('#output');
 const runButton = document.querySelector('#run');
@@ -18,12 +16,35 @@ function print(...values) {
   outputField.textContent += values.join('\t') + '\n';
 }
 
-const lua = await createLua({ print, printErr: console.error });
-const L = lua.luaL_newstate();
-lua.luaL_openlibs(L);
+// Every loaded Lua version keeps its own module and state, so switching back
+// to a version is instant and keeps the globals of earlier runs.
+const sessions = new Map();
+let session = null;
+
+/** Loads liblua-<version>.mjs once and starts a Lua state in it. */
+function loadSession(version) {
+  if (!sessions.has(version)) {
+    const loading = (async () => {
+      const { default: createLua } = await import(`./liblua-${version}.mjs`);
+      const lua = await createLua({ print, printErr: console.error });
+      const L = lua.luaL_newstate();
+      lua.luaL_openlibs(L);
+
+      return { lua, L };
+    })();
+
+    // Forget failed attempts so picking the version again retries
+    loading.catch(() => sessions.delete(version));
+    sessions.set(version, loading);
+  }
+
+  return sessions.get(version);
+}
 
 /** Runs a string of Lua and returns whether it worked. */
 function runLua(code) {
+  const { lua, L } = session;
+
   if (lua.luaL_loadstring(L, code) !== 0) {
     setStatus('warn', 'Failed to compile');
     return false;
@@ -40,6 +61,7 @@ function runLua(code) {
 
 /** Removes everything from the stack and returns it as strings. */
 function popAll() {
+  const { lua, L } = session;
   const values = [];
 
   for (let i = 1; i <= lua.lua_gettop(L); i++) {
@@ -59,6 +81,8 @@ function replay(element, className) {
 
 /** Runs the editor contents. Only a run by the user scrolls the output into view. */
 function runLuaInput({ scroll = true } = {}) {
+  if (!session) return;
+
   outputField.textContent = '';
 
   const succeeded = runLua(inputField.value);
@@ -72,6 +96,7 @@ function runLuaInput({ scroll = true } = {}) {
   // Make it obvious that this is fresh output, also when Ctrl + Enter was used
   replay(runButton, 'ran');
   replay(outputCard, 'ran');
+
   if (scroll) {
     const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
     outputCard.scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });
@@ -89,11 +114,64 @@ inputField.addEventListener('keydown', (event) => {
   }
 });
 
-if (runLua('return _VERSION')) {
-  versionLabel.textContent = popAll()[0];
-  versionLabel.hidden = false;
+runButton.addEventListener('click', () => runLuaInput());
+
+// The build lists the Lua versions next to this page, newest first
+let versions = [];
+
+try {
+  const response = await fetch('versions.json');
+  if (!response.ok) throw new Error(`versions.json responded with HTTP ${response.status}`);
+  versions = await response.json();
+} catch (error) {
+  console.error(error);
+  setStatus('error', 'No Lua builds found');
 }
 
-runButton.addEventListener('click', () => runLuaInput());
-runButton.disabled = false;
-runLuaInput({ scroll: false });
+const picker = createPicker(
+  document.querySelector('#picker'),
+  versions.map((version, index) => ({ value: version, label: `Lua ${version}`, tag: index === 0 ? 'latest' : null })),
+  (version) => useVersion(version),
+);
+
+let wanted = null;
+
+/** Switches to a Lua version, loading it first when needed, then runs the code. */
+async function useVersion(version) {
+  wanted = version;
+  picker.select(version);
+
+  // Remember the choice in the address, so the link opens the same version
+  const url = new URL(location.href);
+  if (version === versions[0]) url.searchParams.delete('lua');
+  else url.searchParams.set('lua', version);
+  history.replaceState(null, '', url);
+
+  runButton.disabled = true;
+  picker.setBusy(true);
+  setStatus('loading', `Loading Lua ${version}…`);
+
+  try {
+    const loaded = await loadSession(version);
+    if (wanted !== version) return; // Another version was picked meanwhile
+
+    session = loaded;
+    runButton.disabled = false;
+    runLuaInput({ scroll: false });
+  } catch (error) {
+    if (wanted !== version) return;
+
+    console.error(error);
+    session = null;
+    setStatus('error', `Could not load Lua ${version}`);
+  } finally {
+    if (wanted === version) picker.setBusy(false);
+  }
+}
+
+if (versions.length > 0) {
+  const requested = new URLSearchParams(location.search).get('lua');
+
+  picker.setDisabled(false);
+  useVersion(versions.includes(requested) ? requested : versions[0]);
+}

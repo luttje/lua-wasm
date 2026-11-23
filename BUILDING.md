@@ -21,8 +21,9 @@ The `dist/` directory then contains:
 | File | Purpose |
 | --- | --- |
 | `liblua-{LUA_VERSION}.mjs` and `liblua-{LUA_VERSION}.wasm` | Lua, built by Emscripten as an ES module. See the [README](README.md#usage) for how to use it |
-| `luafunctions.json` | Describes every exported Lua C API function: its return and parameter types, as JavaScript sees them |
-| `index.html`, `main.js` and `assets/` | A demo page showing how to use the files above. Its sources are in `demo/` |
+| `liblua-{LUA_VERSION}.json` | Describes every exported Lua C API function: its return and parameter types, as JavaScript sees them |
+| `index.html`, `main.js`, `picker.js`, `styles.css` and `assets/` | A demo page showing how to use the files above. Its sources are in `demo/` |
+| `versions.json` | The Lua versions in `dist/`, newest first. The demo offers each of them |
 
 ## Trying the demo
 
@@ -34,17 +35,19 @@ node serve.mjs
 
 Then open http://localhost:8080/. Use `--port <port>` to pick another port, or `--dir <dir>` to serve a build made with `--out`.
 
-Working on the demo itself? `node build.mjs --demo` only copies `demo/` into `dist/` and points it at the Lua build that is already there. It takes a moment instead of a full compile, so run it after each change and refresh the page.
+The demo starts with the newest Lua version in `dist/` and has a picker for the others. To compare versions, build several into the same directory, for example with `node build.mjs --lua 5.1.5,5.4.8,latest`.
+
+Working on the demo itself? `node build.mjs --demo` only copies `demo/` into `dist/` and points it at the Lua builds that are already there. It takes a moment instead of a full compile, so run it after each change and refresh the page.
 
 ## Options
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `--lua <version>` | `latest` | The version _(in X.Y.Z format)_ of [the Lua sources](https://www.lua.org/ftp/) to download and compile. `latest` looks the newest release up on Lua.org. Lua 5.1 and newer are supported. |
+| `--lua <versions>` | `latest` | Comma-separated versions _(in X.Y.Z format)_ of [the Lua sources](https://www.lua.org/ftp/) to download and compile. `latest` looks the newest release up on Lua.org. Lua 5.1 and newer are supported. |
 | `--exports <list>` | all functions | Comma-separated Lua C API functions to export to WASM, without the underscore prefix that emcc uses. |
 | `--out <dir>` | `dist` | Where to put the built files. |
 | `--cache <dir>` | `.cache` | Where to keep the downloaded Lua sources between builds. |
-| `--demo` | | Only copy the demo to the output directory, reusing the Lua build already there. Fast, and needs no Emscripten. |
+| `--demo` | | Only copy the demo to the output directory, reusing the Lua builds already there. Fast, and needs no Emscripten. |
 | `--print-latest` | | Print the latest Lua version and exit. |
 | `--clean` | | Remove the output and cache directories and exit. |
 
@@ -53,6 +56,11 @@ Working on the demo itself? `node build.mjs --demo` only copies `demo/` into `di
 #### Lua 5.1
 ```
 node build.mjs --lua 5.1.5
+```
+
+#### Lua 5.1, 5.4 and the latest version side by side
+```
+node build.mjs --lua 5.1.5,5.4.8,latest
 ```
 
 #### Latest Lua version with 3 functions exposed to WASM

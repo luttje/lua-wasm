@@ -49,11 +49,24 @@ jobs:
 
     steps:
       -
-        name: Download the build of the latest Lua version
+        name: Checkout
+        uses: actions/checkout@v7
+      -
+        name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 'lts/*'
+      -
+        name: Download the builds of every Lua version
         uses: actions/download-artifact@v8
         with:
-          name: liblua-latest
+          pattern: liblua-*
+          merge-multiple: true
           path: dist/
+      -
+        # Each build only listed its own version, so list them all for the picker
+        name: Add the demo for all versions
+        run: node build.mjs --demo
       -
         name: Publish to GitHub pages
         uses: crazy-max/ghaction-github-pages@1d6ee9b181a81033a16bd707a1401afa978daab4 # v5.0.0
