@@ -1,0 +1,74 @@
+name: Release new Lua versions
+
+# Checks lua.org once a week and publishes a pre-release with the built
+# files whenever there is a Lua version that has no release here yet.
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      lua:
+        description: Lua version to release, as X.Y.Z (default is the latest)
+        required: false
+
+permissions:
+  contents: write
+
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GH_REPO: ${{ github.repository }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v7
+      -
+        name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 'lts/*'
+      -
+        name: Find the Lua version to release
+        id: lua
+        env:
+          REQUESTED: ${{ inputs.lua }}
+        run: |
+          version="${REQUESTED:-$(node build.mjs --print-latest)}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+          if gh release view "lua-$version" > /dev/null 2>&1; then
+            echo "Lua $version already has a release, nothing to do."
+            echo "needed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "needed=true" >> "$GITHUB_OUTPUT"
+          fi
+      -
+        name: Install and setup Emscripten
+        if: steps.lua.outputs.needed == 'true'
+        uses: mymindstorm/setup-emsdk@4528d102f7230f0e7b276855c01ea1159be0e984 # v16
+      -
+        name: Build Lua to WebAssembly
+        if: steps.lua.outputs.needed == 'true'
+        env:
+          VERSION: ${{ steps.lua.outputs.version }}
+        run: node build.mjs --lua "$VERSION"
+      -
+        name: Test the build
+        if: steps.lua.outputs.needed == 'true'
+        run: node --test
+      -
+        name: Publish pre-release
+        if: steps.lua.outputs.needed == 'true'
+        env:
+          VERSION: ${{ steps.lua.outputs.version }}
+        run: |
+          (cd dist && zip -r "../liblua-$VERSION-wasm.zip" .)
+
+          gh release create "lua-$VERSION" "liblua-$VERSION-wasm.zip" \
+            --prerelease \
+            --title "Lua $VERSION WebAssembly (automated build)" \
+            --notes "Automated build of Lua $VERSION. It passed the smoke tests, but has not been tested by hand."

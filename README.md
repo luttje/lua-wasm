@@ -1,9 +1,9 @@
 # Lua Web Assembly tools
 
-![The official WASM logo](docs/assets/WebAssembly-Logo_128.png)
-![The official Lua logo](docs/assets/Lua-Logo_128.png)
+![The official WASM logo](demo/assets/WebAssembly-Logo_128.png)
+![The official Lua logo](demo/assets/Lua-Logo_128.png)
 
-_A collection of scripts to help build any version of the Lua source-code into Web Assembly. Supports both Windows and UNIX-based systems._
+_A build script that turns any version of the Lua source-code (5.1 and newer) into Web Assembly. Works on Windows, macOS and Linux._
 
 **[🎈 Play around with a demo here](https://luttje.github.io/lua-wasm)**
 
@@ -38,18 +38,19 @@ For usage information continue reading below or checkout [lua-wasm@gh-pages](htt
     };
     ```
     _Read more about the Module object in [the Emscripten documentation](https://emscripten.org/docs/api_reference/module.html#affecting-execution)_
-2. Look in `docs/main.js` for an example of `initWrappers`, or manually define which of the Lua C API you wish to wrap:
+2. Look in `demo/main.js` for an example of `initWrappers` that wraps the whole Lua C API using the generated `luafunctions.js`, or manually define which functions you wish to wrap:
     ```js
     function initWrappers(){
       luaL_newstate = Module.cwrap('luaL_newstate', 'number', []);
       luaL_openlibs = Module.cwrap('luaL_openlibs', 'number', ['number']);
       luaL_loadstring = Module.cwrap('luaL_loadstring', 'number', ['number', 'string']);
-      lua_pcallk = Module.cwrap('lua_pcallk', 'number', ['number', 'number', 'number', 'number', 'number', 'number']);
+      lua_pcall = Module.cwrap('lua_pcall', 'number', ['number', 'number', 'number', 'number']);
       lua_gettop = Module.cwrap('lua_gettop', 'number', ['number']);
-      lua_settop = Module.cwrap('lua_settop', 'number', ['number', 'number']);
-      lua_tolstring = Module.cwrap('lua_tolstring', 'string', ['number', 'number', 'number']);
+      lua_pop = Module.cwrap('lua_pop', null, ['number', 'number']);
+      lua_tostring = Module.cwrap('lua_tostring', 'string', ['number', 'number']);
     }
     ```
+    _Functions that are macros in C, like `lua_pcall`, `lua_pop` and `lua_tostring`, are available too. [BUILDING](BUILDING.md#which-functions-are-exported) explains how._
 3. You can now use these Lua C API functions
 4. First initialize a Lua state:
     ```js
@@ -62,8 +63,8 @@ For usage information continue reading below or checkout [lua-wasm@gh-pages](htt
 
     // Load the Lua code as a chunk and leave it on the stack as a callable function
     if (luaL_loadstring(luaState, luaCode) == 0) {
-      // Call the chunk function (https://www.lua.org/manual/5.3/manual.html#4.7)
-      if (lua_pcallk(luaState, 0, -1, 0, 0) !== 0)
+      // Call the chunk function (https://www.lua.org/manual/5.4/manual.html#lua_pcall)
+      if (lua_pcall(luaState, 0, -1, 0) !== 0)
         console.error('This program failed to run.');
     } else {
       console.error('This program failed to compile.');
@@ -75,17 +76,17 @@ For usage information continue reading below or checkout [lua-wasm@gh-pages](htt
     if(stackSize > 0){
       console.log('The lua code returned the following:');
       for (let i = 1; i <= stackSize; i++) {
-        // Note: booleans become <empty string> with lua_tolstring
-        console.log(lua_tolstring(luaState, i));
+        // Note: booleans become <empty string> with lua_tostring
+        console.log(lua_tostring(luaState, i));
       }
 
       // Empty the stack
-      lua_settop(luaState, -1 - stackSize);
+      lua_pop(luaState, stackSize);
     }
     ```
 6. Include the `liblua-{VERSION}.js` after the code written in the previous steps (preferably just before the `</body>` tag):
     ```html
-    <script src="liblua-5.4.3.js"></script>
+    <script src="liblua-5.4.8.js"></script>
     ```
 7. Execute your code in the browser and check the console for output:
     ```
@@ -95,20 +96,31 @@ For usage information continue reading below or checkout [lua-wasm@gh-pages](htt
     <empty string>
     2
     ```
+
+### 64-bit integers
+
+Since Lua 5.3 a `lua_Integer` is a 64-bit integer, which WebAssembly passes to and from JavaScript as a [BigInt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt). Functions such as `lua_pushinteger` and `lua_tointeger` therefore take and return BigInts:
+
+```js
+lua_pushinteger(luaState, 42n);
+let value = Number(lua_tointeger(luaState, -1));
+```
+
+Passing a regular number where a `lua_Integer` is expected throws a `TypeError`. `lua_pushnumber` and `lua_tonumber` work with regular numbers.
 ____
 
 ## Maintenance & Contributing
 
 If you find a bug, wish to write a feature or make any other type of contribution then I'll gladly take a look at any issues or Pull Requests made.
 
-Ideally this project would require as little maintenance as possible. It's intended to be set of tools to quickly build Lua into a Web Assembly file and should not stray from that.
+Ideally this project would require as little maintenance as possible. It's intended to be a tool to quickly build Lua into a Web Assembly file and should not stray from that.
 
-_A GitHub action periodically checks for updated Lua versions and automatically builds (untested) [pre-releases](https://github.com/luttje/lua-wasm/releases)._
+_A GitHub action checks for new Lua versions every week and automatically builds [pre-releases](https://github.com/luttje/lua-wasm/releases). These pass a few automated smoke tests, but are otherwise untested._
 
 
 ## Credits
 
-I was inspired to make this when I came across [this repository by François Perrad](https://framagit.org/fperrad/lua.wasm). Although I've changed a lot, some code from that repository may still be present (especially in the `Makefile`).
+I was inspired to make this when I came across [this repository by François Perrad](https://framagit.org/fperrad/lua.wasm). The `Makefile` that was based on it has since been replaced by a Node.js script.
 
 [Lua](https://www.lua.org/) is a free and open-source project by Roberto Ierusalimschy and the rest of the [Lua team](https://www.lua.org/authors.html).
 

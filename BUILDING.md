@@ -1,64 +1,76 @@
 # Building the Lua source-code into a WASM
 
-Run the build command below that is relevant for your system in the root of this repository. 
-
-Building will create a `liblua-{LUA_VERSION}.js` and `liblua-{LUA_VERSION}.wasm` file the `dist/` directory. 
-
-The `docs/` directory will contain an `index.html` showing how to use the built files.
+One Node.js script downloads the Lua sources and compiles them to WebAssembly. It works the same on Windows, macOS and Linux.
 
 ## Requirements
 
-* [Emscripten](https://emscripten.org/docs/getting_started/downloads.html) - To build the Lua sources into a `.wasm` and `.js` file.
-* A compiler that can handle the `Makefile` format:
-  * `make`
-  * (Windows) [The Windows port of the open source GCC compiler by TDM](https://jmeubank.github.io/tdm-gcc/).
-* [Node.js](https://nodejs.org/en/download/) - Used by the `Makefile` to execute the scripts in `tools/`
-  
-Add the paths to all the above software to your PATH variable.
+* [Node.js](https://nodejs.org/en/download/) 20 or newer - Runs the build script. No `npm install` is needed.
+* [Emscripten](https://emscripten.org/docs/getting_started/downloads.html) - Compiles the Lua sources into a `.wasm` and `.js` file. Activate it (`emsdk activate latest` and `emsdk_env`) so that `emcc` is on your PATH.
+* `tar` - Unpacks the Lua sources. It comes with Windows 10 and newer, macOS and Linux.
 
 ## Build
 
-Before you start ensure that all tools have their node modules installed:
+Run this in the root of this repository to build the latest Lua version:
+
 ```
-(cd tools/fetch-latest-lua-version && npm install)
-(cd tools/scrape-lua-signatures && npm install)
-```
-
-### Windows
-
-1. Ensure you installed [the Windows port of the open source GCC compiler by TDM](https://jmeubank.github.io/tdm-gcc/) and added it to your PATH variable.
-2. Open a command prompt in the root of this repository and run 
-`mingw32-make COMPILER=mingw32-make`
-
-### UNIX-based systems
-
-Run this command from a terminal in the root of this repository: 
-`make all`
-
-## Makefile usage
-
-The makefile can be configured to your needs by setting variables. This is also useful for the CI script in this repo.
-
-### Configuration variables
-
-* **COMPILER** - _`Default: make`_: The compiler executable to use to build the sources.
-* **LUA_VERSION** - _`Default: Latest or 5.4.9`_: The version _(in X.Y.Z format)_ of [the Lua sources](https://www.lua.org/ftp/) to download and compile. If no version is provided the `fetch-latest-lua-version` node script tries to scrape Lua.org. If node is not installed the default version is chosen.
-* **EXPORTED_FUNCTIONS** - _`Default: JSON array with most Lua C API functions`_: Which Lua C API functions to export to WASM, formatted as a JSON array. By default the Makefile creates an array of all Lua functions that are not macro's (e.g: `#define lua_call(L,n,r)...`). The array is created by a node script that scrapes the Lua.org manual and checks if no `#define` exists in the downloaded sources.
-
-### Other command examples
-
-#### Lua 5.1 on Windows (mingw32)
-```
-mingw32-make all COMPILER=mingw32-make LUA_VERSION=5.1.1
+node build.mjs
 ```
 
-#### Latest Lua version with 2 functions exposed to WASM
-```
-make all EXPORTED_FUNCTIONS="['_lua_newstate', '_luaL_loadstring']"
-```
-Take note that emcc requires C function names to be prefixed with an underscore(_).
+The `dist/` directory then contains:
 
+| File | Purpose |
+| --- | --- |
+| `liblua-{LUA_VERSION}.js` and `liblua-{LUA_VERSION}.wasm` | Lua, built by Emscripten |
+| `luafunctions.js` | Defines a global `luaFunctions` that describes every exported Lua C API function, for use with `Module.cwrap` |
+| `luafunctions.json` | The same description as plain JSON |
+| `index.html`, `main.js` and `assets/` | A demo page showing how to use the files above. Its sources are in `demo/` |
+
+Open the demo through a web server, for example with `npx http-server dist`. Browsers refuse to load `.wasm` files from `file://` URLs.
+
+## Options
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `--lua <version>` | `latest` | The version _(in X.Y.Z format)_ of [the Lua sources](https://www.lua.org/ftp/) to download and compile. `latest` looks the newest release up on Lua.org. Lua 5.1 and newer are supported. |
+| `--exports <list>` | all functions | Comma-separated Lua C API functions to export to WASM, without the underscore prefix that emcc uses. |
+| `--out <dir>` | `dist` | Where to put the built files. |
+| `--cache <dir>` | `.cache` | Where to keep the downloaded Lua sources between builds. |
+| `--print-latest` | | Print the latest Lua version and exit. |
+| `--clean` | | Remove the output and cache directories and exit. |
+
+### Examples
+
+#### Lua 5.1
+```
+node build.mjs --lua 5.1.5
+```
+
+#### Latest Lua version with 3 functions exposed to WASM
+```
+node build.mjs --exports luaL_newstate,luaL_loadstring,lua_pcall
+```
+
+## Which functions are exported
+
+The build reads the reference manual that ships inside every Lua release (`doc/manual.html`) and exports each C API function it documents, so the list always matches the version you build.
+
+Part of the Lua C API consists of macros, such as `lua_pcall`, `lua_tostring` and `lua_pop`. A macro disappears when C is compiled, which leaves nothing to export. The build therefore generates a small C file that defines a real function for each macro, under the same name. You find it next to the downloaded sources, as `.cache/lua-{LUA_VERSION}/lua_wasm_macros.c`.
+
+A few macros cannot become functions and are skipped. The build prints which ones:
+
+* `lua_pushliteral`, `luaL_newlib` and `luaL_newlibtable` only work on literals. Use `lua_pushstring`, or `lua_createtable` with `luaL_setfuncs`, instead.
+* `luaL_opt` has no fixed parameter types.
+
+## Tests
+
+After building, run:
+
+```
+node --test
+```
+
+This loads the build from `dist/` in Node.js and runs Lua code with it.
 
 ## Cleaning up
 
-After building run `clean` to remove the downloaded Lua sources.
+Run `node build.mjs --clean` to remove the downloaded Lua sources and the built files.

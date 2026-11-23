@@ -23,12 +23,10 @@ var Module = {
 function initWrappers(){
   console.log('Wrapping Lua functions');
 
-  for (const functionName in luaFunctions) {
-    if (Object.hasOwnProperty.call(luaFunctions, functionName)) {
-      const f = luaFunctions[functionName];
-      
-      window[functionName] = Module.cwrap(functionName, f.returnType ?? null, f.parameterTypes ?? undefined)
-    }
+  // luaFunctions comes from the generated luafunctions.js. Every function of
+  // the Lua C API becomes a global with the same name as in C.
+  for (const [name, { returnType, parameterTypes }] of Object.entries(luaFunctions)) {
+    window[name] = Module.cwrap(name, returnType, parameterTypes);
   }
 }
 
@@ -40,7 +38,7 @@ function evaluateLuaString(input) {
   }
 
   if (luaL_loadstring(luaState, input) == 0) {
-    if (lua_pcallk(luaState, 0, -1, 0, 0) == 0) {
+    if (lua_pcall(luaState, 0, -1, 0) == 0) {
       statusLabel.innerHTML = `&#9989; Your program ran successfully and completed at ${new Date().toLocaleTimeString()}.`;
     }
     else {
@@ -54,10 +52,10 @@ function evaluateLuaString(input) {
   let stackSize = lua_gettop(luaState);
 
   for (let i = 1; i <= stackSize; i++) {
-    let result = lua_tolstring(luaState, i);
+    let result = lua_tostring(luaState, i);
     outputField.value += result + '\n';
   }
-  lua_settop(luaState, -1 - stackSize);
+  lua_pop(luaState, stackSize);
 }
 
 function runLuaInput() {
