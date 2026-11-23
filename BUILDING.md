@@ -34,6 +34,8 @@ node serve.mjs
 
 Then open http://localhost:8080/. Use `--port <port>` to pick another port, or `--dir <dir>` to serve a build made with `--out`.
 
+Working on the demo itself? `node build.mjs --demo` only copies `demo/` into `dist/` and points it at the Lua build that is already there. It takes a moment instead of a full compile, so run it after each change and refresh the page.
+
 ## Options
 
 | Option | Default | Description |
@@ -42,6 +44,7 @@ Then open http://localhost:8080/. Use `--port <port>` to pick another port, or `
 | `--exports <list>` | all functions | Comma-separated Lua C API functions to export to WASM, without the underscore prefix that emcc uses. |
 | `--out <dir>` | `dist` | Where to put the built files. |
 | `--cache <dir>` | `.cache` | Where to keep the downloaded Lua sources between builds. |
+| `--demo` | | Only copy the demo to the output directory, reusing the Lua build already there. Fast, and needs no Emscripten. |
 | `--print-latest` | | Print the latest Lua version and exit. |
 | `--clean` | | Remove the output and cache directories and exit. |
 

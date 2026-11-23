@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Builds a Lua release into WebAssembly. Run `node build.mjs --help` for usage.
 
-import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { cp, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
@@ -22,6 +22,8 @@ Options:
                     luaL_newstate,luaL_loadstring,lua_pcall (default: all)
   --out <dir>       Where to put the built files (default: dist)
   --cache <dir>     Where to keep downloaded Lua sources (default: .cache)
+  --demo            Only copy the demo to the output directory, reusing the
+                    Lua build already there (fast, no emcc needed)
   --print-latest    Print the latest Lua version and exit
   --clean           Remove the output and cache directories and exit
   --help            Show this message
@@ -42,6 +44,28 @@ function selectExports(exportable, requested) {
   return names.map((name) => byName.get(name))
 }
 
+/** Copies the demo page to `outDir`, pointed at the Lua module `<name>.mjs`. */
+async function copyDemo(outDir, name) {
+  await cp(DEMO_DIR, outDir, { recursive: true })
+
+  const demoScript = path.join(outDir, 'main.js')
+  await writeFile(demoScript, (await readFile(demoScript, 'utf8')).replace('./liblua.mjs', `./${name}.mjs`))
+}
+
+/** Finds the name of the most recently built Lua module in `outDir`. */
+async function findBuiltModule(outDir) {
+  const files = (await readdir(outDir).catch(() => [])).filter((file) => /^liblua-[\d.]+\.mjs$/.test(file))
+
+  if (files.length === 0) {
+    throw new Error(`No Lua build found in ${outDir}. Run \`node build.mjs\` once first.`)
+  }
+
+  const builtAt = async (file) => (await stat(path.join(outDir, file))).mtimeMs
+  const times = await Promise.all(files.map(builtAt))
+
+  return files[times.indexOf(Math.max(...times))].replace(/\.mjs$/, '')
+}
+
 async function main() {
   const { values: options } = parseArgs({
     options: {
@@ -49,6 +73,7 @@ async function main() {
       exports: { type: 'string' },
       out: { type: 'string' },
       cache: { type: 'string' },
+      demo: { type: 'boolean' },
       'print-latest': { type: 'boolean' },
       clean: { type: 'boolean' },
       help: { type: 'boolean' },
@@ -65,6 +90,13 @@ async function main() {
 
   if (options['print-latest']) {
     console.log(await fetchLatestVersion())
+    return
+  }
+
+  if (options.demo) {
+    const name = await findBuiltModule(outDir)
+    await copyDemo(outDir, name)
+    console.log(`Copied the demo to ${path.relative(process.cwd(), outDir) || '.'}, using ${name}.mjs`)
     return
   }
 
@@ -119,10 +151,7 @@ async function main() {
   // The same description as JSON, for tools and type generators.
   await writeFile(path.join(outDir, 'luafunctions.json'), `${JSON.stringify(bindings, null, 2)}\n`)
 
-  // The demo page, pointed at the module that was just built.
-  await cp(DEMO_DIR, outDir, { recursive: true })
-  const demoScript = path.join(outDir, 'main.js')
-  await writeFile(demoScript, (await readFile(demoScript, 'utf8')).replace('./liblua.mjs', `./${name}.mjs`))
+  await copyDemo(outDir, name)
 
   console.log(`Built ${name}.mjs and ${name}.wasm in ${path.relative(process.cwd(), outDir) || '.'}`)
 }

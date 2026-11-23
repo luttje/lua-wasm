@@ -3,35 +3,61 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Run Lua in your browser, compiled to WebAssembly.">
 
-  <title>Lua Web Assembly &bull; Demo</title>
+  <title>Lua × WebAssembly</title>
+  <link rel="icon" href="assets/Lua-Logo_128.png">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <h1>
-      Lua Web Assembly &bull; Demo
-    </h1>
-    <img src="assets/Lua-Logo_128.png" alt="">
-    <img src="assets/WebAssembly-Logo_128.png" alt="">
-  </header>
+  <main class="container">
+    <header class="hero">
+      <div class="logos">
+        <img class="lua" src="assets/Lua-Logo_128.png" alt="Lua"width="72" height="72">
+        <span class="times" aria-hidden="true">×</span>
+        <img src="assets/WebAssembly-Logo_128.png" alt="WebAssembly" width="72" height="72">
+      </div>
+      <h1>Lua <span class="accent">×</span> WebAssembly</h1>
+      <p class="tagline">The real Lua, compiled to WebAssembly and running right here in your browser.</p>
+      <p class="version" id="version" hidden></p>
+    </header>
 
-  <section>
-    <h2>Lua code</h2>
-    <p><label for="input">Enter Lua source-code you wish to execute:</label></p>
-<textarea id="input" rows="16" cols="80">
-print(_VERSION)
-return "ok"
+    <section class="card" aria-labelledby="input-label">
+      <div class="card-bar">
+        <label id="input-label" for="input">main.lua</label>
+        <button id="run" type="button" disabled>
+          Run <kbd>Ctrl</kbd><kbd>↵</kbd>
+        </button>
+      </div>
+<textarea id="input" spellcheck="false" autocomplete="off" rows="12">
+-- Edit me, then press Run (or Ctrl + Enter)
+print("Hello from " .. _VERSION .. "!")
+
+local phases = { "🌑", "🌒", "🌓", "🌔", "🌕" }
+for i, phase in ipairs(phases) do
+  print(i, phase)
+end
+
+return "returned values show up too", 42
 </textarea>
-<div>
-  <button id="run" type="button" disabled>Run code</button>
-</div>
-  </section>
+    </section>
 
-  <section>
-    <h2>Output</h2>
-    <textarea id="output" rows="8" cols="80" readonly></textarea>
-    <div id="status">&#8986; Loading Lua ...</div>
-  </section>
+    <section class="card output" aria-labelledby="output-label">
+      <div class="card-bar">
+        <span id="output-label">Output</span>
+        <span class="status" id="status" data-state="loading">Loading Lua…</span>
+      </div>
+      <pre id="output" aria-live="polite"></pre>
+    </section>
+
+    <footer>
+      <a href="https://github.com/luttje/lua-wasm">GitHub</a>
+      <span aria-hidden="true">·</span>
+      <a href="https://github.com/luttje/lua-wasm/releases">Download</a>
+      <span aria-hidden="true">·</span>
+      <a href="https://www.lua.org/manual/">Lua manual</a>
+    </footer>
+  </main>
 
   <script type="module" src="main.js"></script>
 </body>
