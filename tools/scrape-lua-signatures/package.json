@@ -17,8 +17,7 @@
   "author": "Lutt.online",
   "license": "MIT",
   "dependencies": {
-    "jsdom": "^16.6.0",
-    "node-fetch": "^2.6.1",
-    "search-in-file": "^1.2.2"
+    "jsdom": "^31.0.1",
+    "search-in-file": "^3.5.2"
   }
 }

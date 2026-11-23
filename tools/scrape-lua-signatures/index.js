@@ -24,7 +24,6 @@ if(!luaVersion)
 
 const { readFileSync, writeFileSync, existsSync } = require("fs")
 const { search, getFilesFromDir } = require('search-in-file')
-const fetch = require('node-fetch')
 const jsdom = require("jsdom")
 const { JSDOM } = jsdom
 

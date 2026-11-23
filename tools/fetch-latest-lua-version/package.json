@@ -15,7 +15,6 @@
   "author": "Lutt.online",
   "license": "MIT",
   "dependencies": {
-    "node-fetch": "^2.6.1",
     "node-scrapy": "^0.5.0"
   }
 }

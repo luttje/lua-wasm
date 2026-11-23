@@ -4,15 +4,17 @@ on: [push, pull_request]
 
 jobs:
  build:
-   runs-on: ubuntu-20.04
+   runs-on: ubuntu-latest
 
    steps:
     - 
       name: Warmup GitHub Actions
-      uses: actions/checkout@v2.0.0
+      uses: actions/checkout@v7
     - 
       name: Setup Node.js
-      uses: actions/setup-node@v2.2.0
+      uses: actions/setup-node@v7
+      with:
+        node-version: 'lts/*'
     -
       name: Install packages for the tools
       run: |
@@ -20,13 +22,13 @@ jobs:
         (cd tools/scrape-lua-signatures && npm install)
     - 
       name: Install and setup Emscripten
-      uses: mymindstorm/setup-emsdk@ca0cef33e53bf9149891246a1b13ef3dbd498ca5
+      uses: mymindstorm/setup-emsdk@4528d102f7230f0e7b276855c01ea1159be0e984 # v16
     - 
       name: Build latest Lua version to Web Assembly using Emscripten
       run: make all
     - 
       name: Publish to GitHub pages
-      uses: crazy-max/ghaction-github-pages@db4476a01402e1a7ce05f41832040eef16d14925
+      uses: crazy-max/ghaction-github-pages@1d6ee9b181a81033a16bd707a1401afa978daab4 # v5.0.0
       with:
         target_branch: gh-pages
         build_dir: docs/
