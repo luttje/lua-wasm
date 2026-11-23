@@ -24,7 +24,15 @@ The `dist/` directory then contains:
 | `luafunctions.json` | Describes every exported Lua C API function: its return and parameter types, as JavaScript sees them |
 | `index.html`, `main.js` and `assets/` | A demo page showing how to use the files above. Its sources are in `demo/` |
 
-Open the demo through a web server, for example with `npx http-server dist`. Browsers refuse to load `.wasm` files from `file://` URLs.
+## Trying the demo
+
+Browsers refuse to load `.wasm` files from `file://` URLs, so the demo needs a web server. After building, run:
+
+```
+node serve.mjs
+```
+
+Then open http://localhost:8080/. Use `--port <port>` to pick another port, or `--dir <dir>` to serve a build made with `--out`.
 
 ## Options
 

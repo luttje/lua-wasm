@@ -11,6 +11,7 @@
   "scripts": {
     "build": "node build.mjs",
     "test": "node --test",
+    "serve": "node serve.mjs",
     "clean": "node build.mjs --clean"
   }
 }
